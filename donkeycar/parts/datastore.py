@@ -642,6 +642,7 @@ class TubGroup(Tub):
         self.meta = {'inputs': list(self.input_types.keys()),
                      'types': list(self.input_types.values())}
 
+        logger.info('I WAS HERE!')
         self.df = pd.concat([t.df for t in self.tubs], axis=0, join='inner')
 
     @property
