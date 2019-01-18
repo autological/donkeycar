@@ -5,6 +5,11 @@ Utilities to manipulate files and directories.
 import glob
 import zipfile
 import os
+import tensorflow as tf
+
+from ..log import get_logger
+
+logger = get_logger(__name__)
 
 def most_recent_file(dir_path, ext=''):
     """
@@ -50,11 +55,18 @@ def time_since_last_file_edited(path):
 def expand_path_mask(path):
     matches = []
     path = os.path.expanduser(path)
-    for file in glob.glob(path):
-        if os.path.isdir(file):
-            matches.append(os.path.join(os.path.abspath(file)))
+    logger.info("The expanded path for this tub is: {}".format(path))
+    if path.startswith('gs://'):
+        for file in tf.gfile.Glob(path):
+            logger.info("Found file: {}".format(file))
+            if tf.gfile.IsDirectory(file):
+                matches.append(os.path.join(os.path.abspath(file)))
+                # matches.append(os.path.join(file) # Alternatively
+    else:
+        for file in glob.glob(path):
+            if os.path.isdir(file):
+                matches.append(os.path.join(os.path.abspath(file)))
     return matches
-
 
 def expand_path_arg(path_str):
     path_list = path_str.split(",")
