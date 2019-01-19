@@ -33,6 +33,9 @@ setup(name='donkeycar',
                         'eventlet',
                         'moviepy',
                         'pandas',
+                        'google-auth',
+                        'google-auth-httplib2',
+                        'google-api-python-client'
                         ],
 
       extras_require={
