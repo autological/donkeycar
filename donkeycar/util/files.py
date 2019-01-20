@@ -55,14 +55,9 @@ def time_since_last_file_edited(path):
 def expand_path_mask(path):
     matches = []
     path = os.path.expanduser(path)
-    print("The expanded path for this tub is: {}".format(path))
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/Users/wes/.ssh/saddle-210105-78307d457b87.json'
     if path.startswith('gs://'):
-        for file in tf.gfile.Glob(path):
-            print("Found file: {}".format(file))
-            # if tf.gfile.IsDirectory(file):
-            #     matches.append(os.path.join(os.path.abspath(file)))
-                # matches.append(os.path.join(file) # Alternatively
+        if tf.gfile.IsDirectory(path):
+            matches.append(path)
     else:
         for file in glob.glob(path):
             if os.path.isdir(file):

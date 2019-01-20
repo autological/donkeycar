@@ -15,6 +15,7 @@ import tarfile
 
 import numpy as np
 import pandas as pd
+import tensorflow as tf
 from PIL import Image
 
 from donkeycar import util
@@ -46,15 +47,21 @@ class Tub(object):
         self.meta_path = os.path.join(self.path, 'meta.json')
         self.df = None
 
-        exists = os.path.exists(self.path)
+        if path.startswith('gs://'):
+            exists = tf.gfile.Exists(self.path)
+        else:
+            exists = os.path.exists(self.path)
 
         if exists:
             # load log and meta
             logger.info('Tub exists: {}'.format(self.path))
-            with open(self.meta_path, 'r') as f:
-                self.meta = json.load(f)
+            if path.startswith('gs://'):
+                with tf.gfile.Open(self.meta_path, 'r') as f:
+                    self.meta = json.load(f)
+            else:
+                with open(self.meta_path, 'r') as f:
+                    self.meta = json.load(f)
             self.current_ix = self.get_last_ix() + 1
-
         elif not exists and inputs:
             logger.info('Tub does NOT exist. Creating new tub...')
             # create log and save meta
@@ -88,7 +95,11 @@ class Tub(object):
         return self.df
 
     def get_index(self, shuffled=True):
-        files = next(os.walk(self.path))[2]
+        if self.path.startswith('gs://'):
+            files = tf.gfile.ListDirectory(self.path)
+            # files = next(tf.gfile.Walk(self.path,in_order=True))[2]
+        else:
+            files = next(os.walk(self.path))[2]
         record_files = [f for f in files if f[:6] == 'record']
 
         def get_file_ix(file_name):
@@ -217,8 +228,12 @@ class Tub(object):
     def get_json_record(self, ix):
         path = self.get_json_record_path(ix)
         try:
-            with open(path, 'r') as fp:
-                json_data = json.load(fp)
+            if path.startswith('gs://'):
+                with tf.gfile.Open(path, 'r') as fp:
+                    json_data = json.load(fp)
+            else:
+                with open(path, 'r') as fp:
+                    json_data = json.load(fp)
         except UnicodeDecodeError:
             raise Exception('bad record: %d. You may want to run `python manage.py check --fix`' % ix)
         except FileNotFoundError:
@@ -242,7 +257,10 @@ class Tub(object):
 
             # load objects that were saved as separate files
             if typ == 'image_array':
-                img = Image.open((val))
+                if val.startswith('gs://'):
+                    img = Image.open(tf.gfile.Open(val, 'rb'))
+                else:
+                    img = Image.open((val))
                 val = np.array(img)
 
             data[key] = val
