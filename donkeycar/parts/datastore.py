@@ -229,9 +229,8 @@ class Tub(object):
         path = self.get_json_record_path(ix)
         try:
             if path.startswith('gs://'):
-                with tf.gfile.FastGFile(path, 'rb') as fp:
-                    json_str = fp.decode('utf-8')
-                    json_data = json.load(json_str)
+                with tf.gfile.FastGFile(path, 'r') as fp:
+                    json_data = json.load(fp)
             else:
                 with open(path, 'r') as fp:
                     json_data = json.load(fp)
