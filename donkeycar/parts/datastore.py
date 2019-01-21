@@ -230,7 +230,8 @@ class Tub(object):
         try:
             if path.startswith('gs://'):
                 with tf.gfile.FastGFile(path, 'rb') as fp:
-                    json_data = json.load(fp)
+                    json_str = fp.read().decode('utf-8')
+                    json_data = json.load(json_str)
             else:
                 with open(path, 'r') as fp:
                     json_data = json.load(fp)
