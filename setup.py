@@ -22,7 +22,7 @@ setup(name='donkeycar',
               'donkey=donkeycar.management.base:execute_from_command_line',
           ],
       },
-      install_requires=['numpy',
+      install_requires=['numpy==1.15.4',
                         'pillow',
                         'docopt',
                         'tornado==4.5.3',
@@ -32,7 +32,8 @@ setup(name='donkeycar',
                         'flask',
                         'eventlet',
                         'moviepy',
-                        'pandas',
+                        'pandas==0.23.4',
+                        'tensorflow==1.8.0'
                         ],
 
       extras_require={
